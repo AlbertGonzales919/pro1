@@ -23,7 +23,7 @@ type Result = {
   plots: { plot1: string; plot2: string; plot3: string };
 };
 
-const API_BASE = "http://127.0.0.1:8001";
+const API_BASE = "https://expansionistic-giddier-shayne.ngrok-free.dev";
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
