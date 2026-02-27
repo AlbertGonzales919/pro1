@@ -4,7 +4,8 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase"; // adjust to your file path
 
-const API_BASE = "https://expansionistic-giddier-shayne.ngrok-free.dev";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8001";
 
 type Sex = "male" | "female" | "other";
 type NapHabit = "no" | "sometimes" | "daily";
@@ -98,7 +99,11 @@ export default function SignupPage() {
 
       const res = await fetch(`${API_BASE}/signup-profile`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          // ✅ needed for ngrok-free to avoid returning the HTML interstitial page
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ email: email.trim(), profile }),
       });
 
@@ -324,7 +329,9 @@ export default function SignupPage() {
             {err && (
               <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3">
                 <div className="text-sm font-semibold text-destructive">Error</div>
-                <pre className="mt-1 whitespace-pre-wrap text-xs text-destructive/90">{err}</pre>
+                <pre className="mt-1 whitespace-pre-wrap text-xs text-destructive/90">
+                  {err}
+                </pre>
               </div>
             )}
 
