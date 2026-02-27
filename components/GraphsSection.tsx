@@ -49,7 +49,11 @@ export default function GraphsSection({ email }: { email: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // one-time cache buster per mount
   const cacheBust = useMemo(() => `t=${Date.now()}`, []);
+
+  // ngrok free often injects an interstitial HTML page unless this is present
+  const NGROK_SKIP = useMemo(() => `ngrok-skip-browser-warning=true`, []);
 
   const analyze = async () => {
     setError("");
@@ -65,12 +69,31 @@ export default function GraphsSection({ email }: { email: string }) {
       const user = auth.currentUser;
       if (!user) throw new Error("Not logged in");
 
-      // ✅ No Firestore dependency anymore — just call your backend
-      const res = await fetch(
-        `${API_BASE}/analyze-user/${encodeURIComponent(email)}`
-      );
+      const url = `${API_BASE}/analyze-user/${encodeURIComponent(email)}`;
 
-      if (!res.ok) throw new Error(await res.text());
+      const res = await fetch(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      // If backend returned HTML (ngrok page), show a clearer message
+      const contentType = res.headers.get("content-type") || "";
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+
+      if (!contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(
+          `Expected JSON but got: ${contentType || "unknown content-type"}\n\n${text.slice(
+            0,
+            300
+          )}`
+        );
+      }
 
       const json = (await res.json()) as Result;
       setData(json);
@@ -128,17 +151,17 @@ export default function GraphsSection({ email }: { email: string }) {
             </CardHeader>
             <CardContent className="space-y-4">
               <img
-                src={`${API_BASE}${data.plots.plot1}?${cacheBust}`}
+                src={`${API_BASE}${data.plots.plot1}?${NGROK_SKIP}&${cacheBust}`}
                 className="w-full rounded-xl border"
                 alt="plot1"
               />
               <img
-                src={`${API_BASE}${data.plots.plot2}?${cacheBust}`}
+                src={`${API_BASE}${data.plots.plot2}?${NGROK_SKIP}&${cacheBust}`}
                 className="w-full rounded-xl border"
                 alt="plot2"
               />
               <img
-                src={`${API_BASE}${data.plots.plot3}?${cacheBust}`}
+                src={`${API_BASE}${data.plots.plot3}?${NGROK_SKIP}&${cacheBust}`}
                 className="w-full rounded-xl border"
                 alt="plot3"
               />
