@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase"; // adjust to your file path
 
-const API_BASE = "http://127.0.0.1:8001";
+const API_BASE = "https://expansionistic-giddier-shayne.ngrok-free.dev";
 
 type Sex = "male" | "female" | "other";
 type NapHabit = "no" | "sometimes" | "daily";
